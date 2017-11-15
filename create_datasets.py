@@ -46,6 +46,7 @@ def main(_):
   writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
 
   # TODO(user): Write code to read in your dataset to examples variable
+  examples = [];
 
   for example in examples:
     tf_example = create_tf_example(example)
