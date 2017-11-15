@@ -48,8 +48,8 @@ from PIL import ImageDraw
 NUMOBJS_DIR = "./numobjs"
 
 def make_numobjs_ims(numobjs_path):
-    im = numobjs_path
-    yield numpy.array(im)[:, :, 0].astype(numpy.float32)
+    numobj = cv2.imread(numobjs_path, cv2.IMREAD_COLOR)
+    yield numobj
 
 def generate_height():
     return random.randrange(30, 200);
@@ -64,14 +64,17 @@ def generate_bg(num_bg_images):
     return bg
 
 
-def generate_im(numobjs, num_bg_images):
+def generate_im(numobj_im, num_bg_images):
     bg = generate_bg(num_bg_images)
-
+    return bg;
 
 
 def load_numobjs(folder_path):
+    numobjs_ims = {}
     numobjs = [f for f in os.listdir(folder_path) if f.endswith('.png')]
-    return numobjs
+    for numobj in numobjs:
+        numobjs_ims[numobj] = make_numobjs_ims(os.path.join(folder_path, numobj))
+    return numobjs, numobjs_ims
 
 
 def generate_ims():
@@ -83,10 +86,10 @@ def generate_ims():
 
     """
     variation = 1.0
-    numobjs = load_numobjs(NUMOBJS_DIR)
+    numobjs, numobjs_ims = load_numobjs(NUMOBJS_DIR)
     num_bg_images = len(os.listdir("bgs"))
     while True:
-        yield generate_im(numobjs, num_bg_images)
+        yield generate_im(numobjs_ims[random.choice(numobjs)], num_bg_images)
 
 
 if __name__ == "__main__":
