@@ -46,23 +46,23 @@ from PIL import Image
 from PIL import ImageDraw
 
 NUMOBJS_DIR = "./numobjs"
+BGS_DIR = "./samples"
 
 def make_numobjs_ims(numobjs_path):
     numobj = cv2.imread(numobjs_path, cv2.IMREAD_COLOR)
     yield numobj
 
 def generate_height():
-    return random.randrange(30, 200);
-
+    return random.randint(30, 200);
 
 def generate_bg(num_bg_images):
     found = False
     while not found:
-        fname = "bgs/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
+        fname = BGS_DIR + "/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
         bg = cv2.imread(fname, cv2.IMREAD_COLOR)
+        found = True
 
     return bg
-
 
 def generate_im(numobj_im, num_bg_images):
     bg = generate_bg(num_bg_images)
@@ -87,7 +87,7 @@ def generate_ims():
     """
     variation = 1.0
     numobjs, numobjs_ims = load_numobjs(NUMOBJS_DIR)
-    num_bg_images = len(os.listdir("bgs"))
+    num_bg_images = len(os.listdir(BGS_DIR))
     while True:
         yield generate_im(numobjs_ims[random.choice(numobjs)], num_bg_images)
 
@@ -95,7 +95,7 @@ def generate_ims():
 if __name__ == "__main__":
     os.mkdir("test")
     im_gen = itertools.islice(generate_ims(), int(sys.argv[1]))
-    print(enumerate(im_gen))
+    print(im_gen);
     for img_idx, (im) in enumerate(im_gen):
         fname = "test/{:08d}.png".format(img_idx)
         print(fname)
