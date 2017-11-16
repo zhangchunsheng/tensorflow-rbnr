@@ -218,7 +218,10 @@ def draw_numobj(bg, obj):
     y = generate_int(100, 200)
     w = box[2] - box[0]
     h = box[3] - box[1]
-    angle = -angle / 180.0 * math.pi
+    if(angle < 0):
+        angle = angle / 180.0 * math.pi
+    else:
+        angle = -angle / 180.0 * math.pi
     asin = math.asin(angle)
     rx = x + (width - width * scalex) / 2 + h * asin / 2;
     ry = y + (height - height * scaley) / 2 + w * asin / 2;
