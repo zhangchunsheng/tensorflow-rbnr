@@ -226,6 +226,12 @@ def draw_numobj(bg, obj):
     if ((ry + h) > bg_height):
         y = y - h;
         ry = y + (height - height * scaley) / 2 + w * asin / 2;
+    if(rx < 0):
+        x = x + w;
+        rx = x + (width - width * scalex) / 2 + h * asin / 2;
+    if(ry < 0):
+        y = y + h;
+        ry = y + (height - height * scaley) / 2 + w * asin / 2;
 
     #draw_box(bg, rx, ry, w, h);
 
