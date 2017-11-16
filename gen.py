@@ -45,6 +45,14 @@ import numpy
 from PIL import Image
 from PIL import ImageDraw
 
+import tensorflow as tf
+
+from utils import dataset_util
+
+flags = tf.app.flags
+flags.DEFINE_string('output_path', './test', 'Path to output TFRecord')
+FLAGS = flags.FLAGS
+
 NUMOBJS_DIR = "./numobjs"
 BGS_DIR = "./samples"
 
@@ -180,7 +188,7 @@ def draw_box(bg, x, y, width, height):
     draw.rectangle([(x, y), (x + width, y + height)], None, (255, 255, 0))
     del draw
 
-def draw_and_record(bg, obj):
+def draw_numobj(bg, obj):
     angle = generate_int(0, 10);
     scalex = generate_float(5, 10);
     scaley = generate_float(5, 10);
@@ -214,7 +222,8 @@ def draw_and_record(bg, obj):
     draw_box(bg, rx, ry, w, h);
 
     bg.paste(out, (x, y), out)
-    bg.show();
+
+    return [(bg_width, bg_height, rx, ry, w, h)]
 
 def generate_impl(numobj_im, num_bg_images):
     bg = generate_bg(num_bg_images)
@@ -222,9 +231,9 @@ def generate_impl(numobj_im, num_bg_images):
     pil_bg = Image.fromarray(bg, 'RGB')
     numobj_im_bg = Image.fromarray(numobj_im, 'RGB')
 
-    draw_and_record(pil_bg, numobj_im_bg);
+    bbox = draw_numobj(pil_bg, numobj_im_bg);
 
-    return numpy.array(pil_bg);
+    return numpy.array(pil_bg), bbox;
 
 def load_numobjs(folder_path):
     numobjs_ims = {}
@@ -233,6 +242,39 @@ def load_numobjs(folder_path):
         numobjs_ims[numobj] = make_numobjs_ims(os.path.join(folder_path, numobj))
     return numobjs, numobjs_ims
 
+def create_tf_example(example):
+    bw, bh, rx, ry, w, h = example.bbox[0]
+
+    height = float(bw) # Image height
+    width = float(bh) # Image width
+    filename = example.filename # Filename of the image. Empty if image is not from file
+    encoded_image_data = None # Encoded image bytes
+    image_format = b'jpg' # b'jpeg' or b'png'
+
+    xmins = [rx / width] # List of normalized left x coordinates in bounding box (1 per box)
+    xmaxs = [(rx + w) / width] # List of normalized right x coordinates in bounding box
+             # (1 per box)
+    ymins = [ry / height] # List of normalized top y coordinates in bounding box (1 per box)
+    ymaxs = [(ry + h) / height] # List of normalized bottom y coordinates in bounding box
+             # (1 per box)
+    classes_text = ['yichang_rbn'] # List of string class name of bounding box (1 per box)
+    classes = [1] # List of integer class id of bounding box (1 per box)
+
+    tf_example = tf.train.Example(features=tf.train.Features(feature={
+        'image/height': dataset_util.int64_feature(height),
+        'image/width': dataset_util.int64_feature(width),
+        'image/filename': dataset_util.bytes_feature(filename),
+        'image/source_id': dataset_util.bytes_feature(filename),
+        'image/encoded': dataset_util.bytes_feature(encoded_image_data),
+        'image/format': dataset_util.bytes_feature(image_format),
+        'image/object/bbox/xmin': dataset_util.float_list_feature(xmins),
+        'image/object/bbox/xmax': dataset_util.float_list_feature(xmaxs),
+        'image/object/bbox/ymin': dataset_util.float_list_feature(ymins),
+        'image/object/bbox/ymax': dataset_util.float_list_feature(ymaxs),
+        'image/object/class/text': dataset_util.bytes_list_feature(classes_text),
+        'image/object/class/label': dataset_util.int64_list_feature(classes),
+    }))
+    return tf_example
 
 def generate_ims():
     """
@@ -256,12 +298,24 @@ def showImg(im):
 
 
 if __name__ == "__main__":
-    #os.mkdir("test")
+    os.mkdir(FLAGS.output_path)
     im_gen = itertools.islice(generate_ims(), int(sys.argv[1]))
     print(im_gen);
-    for img_idx, (im) in enumerate(im_gen):
-        fname = "test/{:08d}.png".format(img_idx)
+
+    writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
+
+    for img_idx, (im, bbox) in enumerate(im_gen):
+        fname = FLAGS.output_path + "/{:08d}.png".format(img_idx)
         print(fname)
-        #cv2.imwrite(fname, im)
+        cv2.imwrite(fname, im)
         #showImg(im)
+
+        example = {
+            "filename": fname,
+            "bbox": bbox
+        }
+        tf_example = create_tf_example(example)
+        writer.write(tf_example.SerializeToString())
+
+    writer.close()
 
