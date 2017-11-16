@@ -167,22 +167,22 @@ def generate_float(min, max, step=1):
 def scaleRotateTranslate(image, angle, center = None, new_center = None, scale = None, expand = False):
     if center is None:
         return image.rotate(angle)
-    angle = -angle/180.0*math.pi
-    nx,ny = x,y = center
-    sx=sy=1.0
+    angle = -angle / 180.0 * math.pi
+    nx, ny = x, y = center
+    sx = sy = 1.0
     if new_center:
-        (nx,ny) = new_center
+        (nx, ny) = new_center
     if scale:
-        (sx,sy) = scale
+        (sx, sy) = scale
     cosine = math.cos(angle)
     sine = math.sin(angle)
-    a = cosine/sx
-    b = sine/sx
-    c = x-nx*a-ny*b
-    d = -sine/sy
-    e = cosine/sy
-    f = y-nx*d-ny*e
-    return image.transform(image.size, Image.AFFINE, (a,b,c,d,e,f), resample=Image.BICUBIC)
+    a = cosine / sx
+    b = sine / sx
+    c = x - nx * a - ny * b
+    d = -sine / sy
+    e = cosine / sy
+    f = y - nx * d - ny * e
+    return image.transform(image.size, Image.AFFINE, (a, b, c, d, e, f), resample=Image.BICUBIC)
 
 def draw_box(bg, x, y, width, height):
     draw = ImageDraw.Draw(bg)
@@ -220,7 +220,7 @@ def draw_numobj(bg, obj):
         y = y - h;
         ry = y + (height - height * scaley) / 2 + w * asin / 2;
 
-    draw_box(bg, rx, ry, w, h);
+    #draw_box(bg, rx, ry, w, h);
 
     bg.paste(out, (x, y), out)
 
