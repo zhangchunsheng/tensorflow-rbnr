@@ -199,9 +199,9 @@ def draw_numobj(bg, obj):
     bg_width = bg.size[0]
     bg_height = bg.size[1]
 
-    if(bg_width < width + 200):
+    if(bg_width < width + 100):
         scalex = 0.2
-    if(bg_height < height + 200):
+    if(bg_height < height + 100):
         scaley = 0.2
 
     scale = (scalex, scaley);
