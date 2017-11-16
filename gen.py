@@ -246,11 +246,13 @@ def load_numobjs(folder_path):
 def create_tf_example(example):
     bw, bh, rx, ry, w, h = example['bbox'][0]
 
-    height = long(bw) # Image height
-    width = long(bh) # Image width
+    width = long(bw)  # Image width
+    height = long(bh) # Image height
     filename = example['filename'] # Filename of the image. Empty if image is not from file
-    encoded_image_data = None # Encoded image bytes
-    image_format = b'jpg' # b'jpeg' or b'png'
+
+    with tf.gfile.GFile(example['fname'], 'rb') as fid:
+        encoded_image_data = fid.read() # Encoded image bytes
+    image_format = b'png' # b'jpeg' or b'png'
 
     xmins = [rx / width] # List of normalized left x coordinates in bounding box (1 per box)
     xmaxs = [(rx + w) / width] # List of normalized right x coordinates in bounding box
@@ -297,7 +299,6 @@ def showImg(im):
     cv2.waitKey()
     cv2.destroyWindow("image")
 
-
 if __name__ == "__main__":
     os.mkdir(DATA_DIR)
     im_gen = itertools.islice(generate_ims(), int(sys.argv[1]))
@@ -306,13 +307,15 @@ if __name__ == "__main__":
     writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
 
     for img_idx, (im, bbox) in enumerate(im_gen):
-        fname = DATA_DIR + "/{:08d}.png".format(img_idx)
+        filename = "{:08d}.png".format(img_idx)
+        fname = DATA_DIR + "/" + filename
         print(fname)
         cv2.imwrite(fname, im)
         #showImg(im)
 
         example = {
-            "filename": fname,
+            "filename": filename,
+            "fname": fname,
             "bbox": bbox
         }
         print(example)
