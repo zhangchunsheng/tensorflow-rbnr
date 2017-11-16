@@ -192,7 +192,7 @@ def draw_box(bg, x, y, width, height):
     del draw
 
 def draw_numobj(bg, obj):
-    angle = generate_int(0, 10);
+    angle = generate_int(-10, 10);
     scalex = generate_float(5, 10);
     scaley = generate_float(5, 10);
 
