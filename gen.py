@@ -50,9 +50,10 @@ import tensorflow as tf
 from utils import dataset_util
 
 flags = tf.app.flags
-flags.DEFINE_string('output_path', './test', 'Path to output TFRecord')
+flags.DEFINE_string('output_path', './test/rbnr.record', 'Path to output TFRecord')
 FLAGS = flags.FLAGS
 
+DATA_DIR = "./test"
 NUMOBJS_DIR = "./numobjs"
 BGS_DIR = "./samples"
 
@@ -243,11 +244,11 @@ def load_numobjs(folder_path):
     return numobjs, numobjs_ims
 
 def create_tf_example(example):
-    bw, bh, rx, ry, w, h = example.bbox[0]
+    bw, bh, rx, ry, w, h = example['bbox'][0]
 
     height = float(bw) # Image height
     width = float(bh) # Image width
-    filename = example.filename # Filename of the image. Empty if image is not from file
+    filename = example['filename'] # Filename of the image. Empty if image is not from file
     encoded_image_data = None # Encoded image bytes
     image_format = b'jpg' # b'jpeg' or b'png'
 
@@ -298,14 +299,14 @@ def showImg(im):
 
 
 if __name__ == "__main__":
-    os.mkdir(FLAGS.output_path)
+    os.mkdir(DATA_DIR)
     im_gen = itertools.islice(generate_ims(), int(sys.argv[1]))
     print(im_gen);
 
     writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
 
     for img_idx, (im, bbox) in enumerate(im_gen):
-        fname = FLAGS.output_path + "/{:08d}.png".format(img_idx)
+        fname = DATA_DIR + "/{:08d}.png".format(img_idx)
         print(fname)
         cv2.imwrite(fname, im)
         #showImg(im)
@@ -314,6 +315,7 @@ if __name__ == "__main__":
             "filename": fname,
             "bbox": bbox
         }
+        print(example)
         tf_example = create_tf_example(example)
         writer.write(tf_example.SerializeToString())
 
