@@ -55,7 +55,7 @@ FLAGS = flags.FLAGS
 
 DATA_DIR = "./test"
 NUMOBJS_DIR = "./numobjs"
-BGS_DIR = "./samples"
+BGS_DIR = "./bgs"
 
 def make_numobjs_ims(numobjs_path):
     numobj = cv2.imread(numobjs_path, cv2.IMREAD_COLOR)
