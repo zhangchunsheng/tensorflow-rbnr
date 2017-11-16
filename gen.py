@@ -50,10 +50,78 @@ BGS_DIR = "./samples"
 
 def make_numobjs_ims(numobjs_path):
     numobj = cv2.imread(numobjs_path, cv2.IMREAD_COLOR)
-    yield numobj
+    return numobj
 
-def generate_height():
-    return random.randint(30, 200);
+def euler_to_mat(yaw, pitch, roll):
+    # Rotate clockwise about the Y-axis
+    c, s = math.cos(yaw), math.sin(yaw)
+    M = numpy.matrix([[  c, 0.,  s],
+                      [ 0., 1., 0.],
+                      [ -s, 0.,  c]])
+
+    # Rotate clockwise about the X-axis
+    c, s = math.cos(pitch), math.sin(pitch)
+    M = numpy.matrix([[ 1., 0., 0.],
+                      [ 0.,  c, -s],
+                      [ 0.,  s,  c]]) * M
+
+    # Rotate clockwise about the Z-axis
+    c, s = math.cos(roll), math.sin(roll)
+    M = numpy.matrix([[  c, -s, 0.],
+                      [  s,  c, 0.],
+                      [ 0., 0., 1.]]) * M
+
+    return M
+
+def make_affine_transform(from_shape, to_shape,
+                          min_scale, max_scale,
+                          scale_variation=1.0,
+                          rotation_variation=1.0,
+                          translation_variation=1.0):
+    out_of_bounds = False
+
+    from_size = numpy.array([[from_shape[1], from_shape[0]]]).T
+    to_size = numpy.array([[to_shape[1], to_shape[0]]]).T
+
+    scale = random.uniform((min_scale + max_scale) * 0.5 -
+                           (max_scale - min_scale) * 0.5 * scale_variation,
+                           (min_scale + max_scale) * 0.5 +
+                           (max_scale - min_scale) * 0.5 * scale_variation)
+    if scale > max_scale or scale < min_scale:
+        out_of_bounds = True
+    roll = random.uniform(-0.3, 0.3) * rotation_variation
+    pitch = random.uniform(-0.2, 0.2) * rotation_variation
+    yaw = random.uniform(-1.2, 1.2) * rotation_variation
+
+    # Compute a bounding box on the skewed input image (`from_shape`).
+    M = euler_to_mat(yaw, pitch, roll)[:2, :2]
+    h = from_shape[0]
+    w = from_shape[1]
+    corners = numpy.matrix([[-w, +w, -w, +w],
+                            [-h, -h, +h, +h]]) * 0.5
+    skewed_size = numpy.array(numpy.max(M * corners, axis=1) -
+                              numpy.min(M * corners, axis=1))
+
+    # Set the scale as large as possible such that the skewed and scaled shape
+    # is less than or equal to the desired ratio in either dimension.
+    scale *= numpy.min(to_size / skewed_size)
+
+    # Set the translation such that the skewed and scaled image falls within
+    # the output shape's bounds.
+    trans = (numpy.random.random((2,1)) - 0.5) * translation_variation
+    trans = ((2.0 * trans) ** 5.0) / 2.0
+    if numpy.any(trans < -0.5) or numpy.any(trans > 0.5):
+        out_of_bounds = True
+    trans = (to_size - skewed_size * scale) * trans
+
+    center_to = to_size / 2.
+    center_from = from_size / 2.
+
+    M = euler_to_mat(yaw, pitch, roll)[:2, :2]
+    M *= scale
+    M = numpy.hstack([M, trans + center_to - M * center_from])
+
+    return M, out_of_bounds
 
 def generate_bg(num_bg_images):
     found = False
@@ -66,8 +134,97 @@ def generate_bg(num_bg_images):
 
 def generate_im(numobj_im, num_bg_images):
     bg = generate_bg(num_bg_images)
-    return bg;
 
+    M, out_of_bounds = make_affine_transform(
+        from_shape=numobj_im.shape,
+        to_shape=bg.shape,
+        min_scale=0.6,
+        max_scale=0.875,
+        rotation_variation=1.0,
+        scale_variation=1.5,
+        translation_variation=1.2)
+
+    numobj_im1 = cv2.warpAffine(numobj_im, M, (bg.shape[1], bg.shape[0]))
+    out = numobj_im1 + bg
+
+    return out;
+
+def generate_int(min, max):
+    return random.randint(min, max);
+
+def generate_float(min, max, step=1):
+    return random.randrange(min, max, step) / 10.;
+
+def scaleRotateTranslate(image, angle, center = None, new_center = None, scale = None, expand = False):
+    if center is None:
+        return image.rotate(angle)
+    angle = -angle/180.0*math.pi
+    nx,ny = x,y = center
+    sx=sy=1.0
+    if new_center:
+        (nx,ny) = new_center
+    if scale:
+        (sx,sy) = scale
+    cosine = math.cos(angle)
+    sine = math.sin(angle)
+    a = cosine/sx
+    b = sine/sx
+    c = x-nx*a-ny*b
+    d = -sine/sy
+    e = cosine/sy
+    f = y-nx*d-ny*e
+    return image.transform(image.size, Image.AFFINE, (a,b,c,d,e,f), resample=Image.BICUBIC)
+
+def draw_box(bg, x, y, width, height):
+    draw = ImageDraw.Draw(bg)
+    draw.rectangle([(x, y), (x + width, y + height)], None, (255, 255, 0))
+    del draw
+
+def draw_and_record(bg, obj):
+    angle = generate_int(0, 10);
+    scalex = generate_float(5, 10);
+    scaley = generate_float(5, 10);
+    scale = (scalex, scaley);
+
+    width = obj.size[0]
+    height = obj.size[1]
+    bg_width = bg.size[0]
+    bg_height = bg.size[1]
+    im = obj.convert('RGBA')
+    # out = im.rotate(45, expand=1)
+    # out = im.transpose(Image.ROTATE_180)
+    out = scaleRotateTranslate(im, angle, (width / 2, height / 2), None, scale);
+
+    box = out.getbbox();# left, upper, right, and lower
+    x = generate_int(100, 200)
+    y = generate_int(100, 200)
+    w = box[2] - box[0]
+    h = box[3] - box[1]
+    angle = -angle / 180.0 * math.pi
+    asin = math.asin(angle)
+    rx = x + (width - width * scalex) / 2 + h * asin / 2;
+    ry = y + (height - height * scaley) / 2 + w * asin / 2;
+    if((rx + w) > bg_width):
+        x = x - w;
+        rx = x + (width - width * scalex) / 2 + h * asin / 2;
+    if ((ry + h) > bg_height):
+        y = y - h;
+        ry = y + (height - height * scaley) / 2 + w * asin / 2;
+
+    draw_box(bg, rx, ry, w, h);
+
+    bg.paste(out, (x, y), out)
+    bg.show();
+
+def generate_impl(numobj_im, num_bg_images):
+    bg = generate_bg(num_bg_images)
+
+    pil_bg = Image.fromarray(bg, 'RGB')
+    numobj_im_bg = Image.fromarray(numobj_im, 'RGB')
+
+    draw_and_record(pil_bg, numobj_im_bg);
+
+    return numpy.array(pil_bg);
 
 def load_numobjs(folder_path):
     numobjs_ims = {}
@@ -89,15 +246,22 @@ def generate_ims():
     numobjs, numobjs_ims = load_numobjs(NUMOBJS_DIR)
     num_bg_images = len(os.listdir(BGS_DIR))
     while True:
-        yield generate_im(numobjs_ims[random.choice(numobjs)], num_bg_images)
+        yield generate_impl(numobjs_ims[random.choice(numobjs)], num_bg_images)
+
+def showImg(im):
+    cv2.namedWindow("image", 1)
+    cv2.imshow("image", im)
+    cv2.waitKey()
+    cv2.destroyWindow("image")
 
 
 if __name__ == "__main__":
-    os.mkdir("test")
+    #os.mkdir("test")
     im_gen = itertools.islice(generate_ims(), int(sys.argv[1]))
     print(im_gen);
     for img_idx, (im) in enumerate(im_gen):
         fname = "test/{:08d}.png".format(img_idx)
         print(fname)
-        cv2.imwrite(fname, im)
+        #cv2.imwrite(fname, im)
+        #showImg(im)
 
