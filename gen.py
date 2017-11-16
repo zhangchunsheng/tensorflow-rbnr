@@ -315,7 +315,21 @@ def showImg(im):
     cv2.waitKey()
     cv2.destroyWindow("image")
 
+def nukedir(dir):
+    if dir[-1] == os.sep: dir = dir[:-1]
+    files = os.listdir(dir)
+    for file in files:
+        if file == '.' or file == '..': continue
+        path = dir + os.sep + file
+        if os.path.isdir(path):
+            nukedir(path)
+        else:
+            os.unlink(path)
+    os.rmdir(dir)
+
 if __name__ == "__main__":
+    if os.path.exists(DATA_DIR):
+        nukedir(DATA_DIR)
     os.mkdir(DATA_DIR)
     im_gen = itertools.islice(generate_ims(), int(FLAGS.numbers))
     print(im_gen);
