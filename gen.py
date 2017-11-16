@@ -193,12 +193,19 @@ def draw_numobj(bg, obj):
     angle = generate_int(0, 10);
     scalex = generate_float(5, 10);
     scaley = generate_float(5, 10);
-    scale = (scalex, scaley);
 
     width = obj.size[0]
     height = obj.size[1]
     bg_width = bg.size[0]
     bg_height = bg.size[1]
+
+    if(bg_width < width + 200):
+        scalex = 0.2
+    if(bg_height < height + 200):
+        scaley = 0.2
+
+    scale = (scalex, scaley);
+
     im = obj.convert('RGBA')
     # out = im.rotate(45, expand=1)
     # out = im.transpose(Image.ROTATE_180)
