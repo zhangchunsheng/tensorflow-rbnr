@@ -246,8 +246,8 @@ def load_numobjs(folder_path):
 def create_tf_example(example):
     bw, bh, rx, ry, w, h = example['bbox'][0]
 
-    height = float(bw) # Image height
-    width = float(bh) # Image width
+    height = long(bw) # Image height
+    width = long(bh) # Image width
     filename = example['filename'] # Filename of the image. Empty if image is not from file
     encoded_image_data = None # Encoded image bytes
     image_format = b'jpg' # b'jpeg' or b'png'
