@@ -51,6 +51,8 @@ from utils import dataset_util
 
 flags = tf.app.flags
 flags.DEFINE_string('output_path', './test/rbnr.record', 'Path to output TFRecord')
+flags.DEFINE_string('draw_bbox', 0, 'Draw bbox')
+flags.DEFINE_string('numbers', 128, 'Make numbers of images')
 FLAGS = flags.FLAGS
 
 DATA_DIR = "./test"
@@ -233,7 +235,8 @@ def draw_numobj(bg, obj):
         y = y + h;
         ry = y + (height - height * scaley) / 2 + w * asin / 2;
 
-    #draw_box(bg, rx, ry, w, h);
+    if(FLAGS.draw_bbox):
+        draw_box(bg, rx, ry, w, h);
 
     bg.paste(out, (x, y), out)
 
@@ -314,7 +317,7 @@ def showImg(im):
 
 if __name__ == "__main__":
     os.mkdir(DATA_DIR)
-    im_gen = itertools.islice(generate_ims(), int(sys.argv[1]))
+    im_gen = itertools.islice(generate_ims(), int(FLAGS.numbers))
     print(im_gen);
 
     writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
