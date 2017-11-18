@@ -274,11 +274,14 @@ def create_tf_example(example):
     image_format = b'png' # b'jpeg' or b'png'
 
     xmins = [rx / width] # List of normalized left x coordinates in bounding box (1 per box)
-    xmaxs = [(rx + w) / width] # List of normalized right x coordinates in bounding box
-             # (1 per box)
+    xmaxs = [(rx + w) / width] # List of normalized right x coordinates in bounding box (1 per box)
+    if(xmaxs > 1):
+        xmaxs = 1;
     ymins = [ry / height] # List of normalized top y coordinates in bounding box (1 per box)
-    ymaxs = [(ry + h) / height] # List of normalized bottom y coordinates in bounding box
-             # (1 per box)
+    ymaxs = [(ry + h) / height] # List of normalized bottom y coordinates in bounding box (1 per box)
+    if(ymaxs > 1):
+        ymaxs = 1;
+
     classes_text = ['yichang_rbn'] # List of string class name of bounding box (1 per box)
     classes = [1] # List of integer class id of bounding box (1 per box)
 
