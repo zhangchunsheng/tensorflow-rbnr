@@ -52,8 +52,7 @@ from utils import dataset_util
 flags = tf.app.flags
 flags.DEFINE_string('output_name', 'rbnr.record', 'Path to output TFRecord')
 flags.DEFINE_string('draw_bbox', 0, 'Draw bbox')
-flags.DEFINE_string('output_data_dir', './test', 'Output data dir')
-flags.DEFINE_string('draw_bbox', 0, 'Draw bbox')
+flags.DEFINE_string('output_data_dir', 'test', 'Output data dir')
 flags.DEFINE_string('numbers', 128, 'Make numbers of images')
 FLAGS = flags.FLAGS
 
