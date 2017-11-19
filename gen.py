@@ -50,12 +50,13 @@ import tensorflow as tf
 from utils import dataset_util
 
 flags = tf.app.flags
-flags.DEFINE_string('output_path', './test/rbnr.record', 'Path to output TFRecord')
+flags.DEFINE_string('output_name', 'rbnr.record', 'Path to output TFRecord')
+flags.DEFINE_string('draw_bbox', 0, 'Draw bbox')
+flags.DEFINE_string('output_data_dir', './test', 'Output data dir')
 flags.DEFINE_string('draw_bbox', 0, 'Draw bbox')
 flags.DEFINE_string('numbers', 128, 'Make numbers of images')
 FLAGS = flags.FLAGS
 
-DATA_DIR = "./test"
 NUMOBJS_DIR = "./numobjs"
 BGS_DIR = "./bgs"
 
@@ -338,17 +339,17 @@ def nukedir(dir):
     os.rmdir(dir)
 
 if __name__ == "__main__":
-    if os.path.exists(DATA_DIR):
-        nukedir(DATA_DIR)
-    os.mkdir(DATA_DIR)
+    if os.path.exists(FLAGS.output_data_dir):
+        nukedir(FLAGS.output_data_dir)
+    os.mkdir(FLAGS.output_data_dir)
     im_gen = itertools.islice(generate_ims(), int(FLAGS.numbers))
     print(im_gen);
 
-    writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
+    writer = tf.python_io.TFRecordWriter(FLAGS.output_data_dir + "/" + FLAGS.output_name)
 
     for img_idx, (im, bbox) in enumerate(im_gen):
         filename = "{:08d}.png".format(img_idx)
-        fname = DATA_DIR + "/" + filename
+        fname = FLAGS.output_data_dir + "/" + filename
         print(fname)
         cv2.imwrite(fname, im)
         #showImg(im)
