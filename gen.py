@@ -53,11 +53,11 @@ flags = tf.app.flags
 flags.DEFINE_string('output_name', 'rbnr.record', 'Path to output TFRecord')
 flags.DEFINE_string('draw_bbox', 0, 'Draw bbox')
 flags.DEFINE_string('output_data_dir', './test', 'Output data dir')
+flags.DEFINE_string('bg_dir', './bgs', 'Output data dir')
 flags.DEFINE_string('numbers', 128, 'Make numbers of images')
 FLAGS = flags.FLAGS
 
 NUMOBJS_DIR = "./numobjs"
-BGS_DIR = "./bgs"
 
 def make_numobjs_ims(numobjs_path):
     numobj = cv2.imread(numobjs_path, cv2.IMREAD_COLOR)
@@ -137,7 +137,7 @@ def make_affine_transform(from_shape, to_shape,
 def generate_bg(num_bg_images):
     found = False
     while not found:
-        fname = BGS_DIR + "/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
+        fname = FLAGS.bg_dir + "/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
         bg = cv2.imread(fname, cv2.IMREAD_COLOR)
         found = True
 
@@ -315,7 +315,7 @@ def generate_ims():
     """
     variation = 1.0
     numobjs, numobjs_ims = load_numobjs(NUMOBJS_DIR)
-    num_bg_images = len(os.listdir(BGS_DIR))
+    num_bg_images = len(os.listdir(FLAGS.bg_dir))
     while True:
         yield generate_impl(numobjs_ims[random.choice(numobjs)], num_bg_images)
 
