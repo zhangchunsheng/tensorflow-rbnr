@@ -248,14 +248,17 @@ def _run_checkpoint_once(tensor_dict,
                         result_dict = {}
                 else:
                     result_dict = batch_processor(tensor_dict, sess, batch, counters)
+
+                print(result_dict)
+
                 for evaluator in evaluators:
                     # TODO: Use image_id tensor once we fix the input data
                     # decoders to return corrent image_id.
                     # TODO: result_dict contains batches of images, while
                     # add_single_ground_truth_image_info expects a single image. Fix
-                    evaluator.add_single_ground_truth_image_info(
-                        image_id=batch, groundtruth_dict=result_dict
-                    )
+                    #evaluator.add_single_ground_truth_image_info(
+                    #    image_id=batch, groundtruth_dict=result_dict
+                    #)
                     evaluator.add_single_detected_image_info(
                         image_id=batch, detections_dict=result_dict
                     )
