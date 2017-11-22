@@ -249,7 +249,7 @@ def _run_checkpoint_once(tensor_dict,
                 else:
                     result_dict = batch_processor(tensor_dict, sess, batch, counters)
 
-                print(result_dict)
+                #print(result_dict)
 
                 for evaluator in evaluators:
                     # TODO: Use image_id tensor once we fix the input data
