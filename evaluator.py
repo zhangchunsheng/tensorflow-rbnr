@@ -153,6 +153,7 @@ def evaluate(create_input_dict_fn, create_model_fn, eval_config, categories,
         try:
             result_dict = sess.run(tensor_dict)
             counters['success'] += 1
+            print(counters)
         except tf.errors.InvalidArgumentError:
             logging.info('Skipping image')
             counters['skipped'] += 1
