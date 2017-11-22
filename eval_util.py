@@ -35,7 +35,7 @@ def write_metrics(metrics, global_step, summary_dir):
         logging.info('%s: %f', key, metrics[key])
     summary_writer.close()
     logging.info('Metrics written to tf summary.')
-    
+
 # TODO: Add tests.
 def visualize_detection_results(result_dict,
                                 tag,
@@ -51,7 +51,7 @@ def visualize_detection_results(result_dict,
 
     This function visualizes an image with its detected bounding boxes and writes
     to image summaries which can be viewed on tansorboard. It optionally also
-    writes images to a direcory. In the case of missing entry in the label map,
+    writes images to a directory. In the case of missing entry in the label map,
     unknown class name in the visualization is shown as "N/A".
 
     Args:
@@ -108,7 +108,7 @@ def visualize_detection_results(result_dict,
     detection_classes = np.int32((result_dict['detection_classes']))
     detection_keypoints = result_dict.get('detection_keypoints', None)
     detection_masks = result_dict.get('detection_masks', None)
-    
+
     # Plot groundtruth underneath detections
     if show_groundtruth:
         groundtruth_boxes = result_dict['groundtruth_boxes']
