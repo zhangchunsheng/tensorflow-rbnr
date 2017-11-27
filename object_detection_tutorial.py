@@ -110,4 +110,4 @@ with detection_graph.as_default():
             )
             plt.figure(figsize=IMAGE_SIZE)
             plt.imshow(image_np)
-            plt.waitforbuttonpress()
+        plt.waitforbuttonpress()
