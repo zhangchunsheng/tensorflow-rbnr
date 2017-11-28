@@ -109,6 +109,10 @@ def visualize_detection_results(result_dict,
     detection_keypoints = result_dict.get('detection_keypoints', None)
     detection_masks = result_dict.get('detection_masks', None)
 
+    print(detection_boxes)
+    print(detection_classes)
+    print(detection_scores)
+
     # Plot groundtruth underneath detections
     if show_groundtruth:
         groundtruth_boxes = result_dict['groundtruth_boxes']
