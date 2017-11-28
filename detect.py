@@ -316,6 +316,7 @@ def visualize_detection_results(result_dict,
 
     print(detection_boxes)
     print(detection_classes)
+    print(detection_scores)
 
     vis_utils.visualize_boxes_and_labels_on_image_array(
         image,
@@ -332,6 +333,10 @@ def visualize_detection_results(result_dict,
     )
 
     image_pil = Image.fromarray(np.uint8(image)).convert('RGB')
+
+    #with tf.gfile.Open("/Users/changetheworld/dev/git/tensorflow-rbnr/models/modelNumobj/eval/test.png", 'w') as fid:
+    #    image_pil.save(fid, 'PNG')
+
 
     image_pil.show();
     #cv2.namedWindow('detection', cv2.WINDOW_AUTOSIZE)
