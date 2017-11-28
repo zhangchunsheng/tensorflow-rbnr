@@ -134,7 +134,8 @@ def detect(create_model_fn, categories):
     model = create_model_fn()
 
     image_path = './sports/1509882717793_d80e5584_4ac7_4e77_ad95_dddf7e64e572.jpg';
-    image_path = './eval/00000000.png';
+    image_path = './sports/1509882848782_417493bd_c888_47c5_92b0_3dfbbc243441.jpg';
+    #image_path = './eval/00000000.png';
     image = Image.open(image_path)
 
     # the array based representatioin of the image will be used later in order to prepare the
