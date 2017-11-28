@@ -128,12 +128,11 @@ def detect(create_model_fn):
     model = create_model_fn()
 
     image = cv2.imread('./sports/1509882717793_d80e5584_4ac7_4e77_ad95_dddf7e64e572.jpg')
+    image = cv2.imread('./eval/00000000.png')
     original_image = tf.expand_dims(image, axis=0)
     preprocessed_image = model.preprocess(tf.to_float(original_image))
     prediction_dict = model.predict(preprocessed_image)
     detections = model.postprocess(prediction_dict)
-
-    print(detections)
 
     sess = tf.Session('', graph=tf.get_default_graph())
     sess.run(tf.global_variables_initializer());
@@ -298,7 +297,6 @@ def result_dict_for_single_example(image,
 def visualize_detection_results(result_dict,
                                 categories,
                                 agnostic_mode=False,
-                                show_groundtruth=False,
                                 min_score_thresh=.5,
                                 max_num_predictions=20):
     if not set([
@@ -306,9 +304,6 @@ def visualize_detection_results(result_dict,
         'detection_classes'
     ]).issubset(set(result_dict.keys())):
         raise ValueError('result_dict does not contain all expected key.')
-    if show_groundtruth and 'groundtruth_boxes' not in result_dict:
-        raise ValueError('If show_groundtruth is enabled, result_dict must contain '
-                         'groundtruth_boxes.')
     logging.info('Creating detection visualizations.')
     category_index = label_map_util.create_category_index(categories)
 
@@ -319,20 +314,8 @@ def visualize_detection_results(result_dict,
     detection_keypoints = result_dict.get('detection_keypoints', None)
     detection_masks = result_dict.get('detection_masks', None)
 
-    # Plot groundtruth underneath detections
-    if show_groundtruth:
-        groundtruth_boxes = result_dict['groundtruth_boxes']
-        groundtruth_keypoints = result_dict.get('groundtruth_keypoints', None)
-        vis_utils.visualize_boxes_and_labels_on_image_array(
-            image,
-            groundtruth_boxes,
-            None,
-            None,
-            category_index,
-            keypoints=groundtruth_keypoints,
-            use_normalized_coordinates=False,
-            max_boxes_to_draw=None
-        )
+    print(detection_boxes)
+    print(detection_classes)
 
     vis_utils.visualize_boxes_and_labels_on_image_array(
         image,
