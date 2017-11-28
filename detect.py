@@ -124,12 +124,25 @@ def main(unused_argv):
 
     detect(model_fn, categories)
 
+def load_image_into_numpy_array(image):
+    (im_width, im_height) = image.size
+    return np.array(image.getdata()).reshape(
+        (im_height, im_width, 3)
+    ).astype(np.uint8)
+
 def detect(create_model_fn, categories):
     model = create_model_fn()
 
-    image = cv2.imread('./sports/1509882717793_d80e5584_4ac7_4e77_ad95_dddf7e64e572.jpg')
-    image = cv2.imread('./eval/00000000.png')
-    original_image = tf.expand_dims(image, axis=0)
+    image_path = './sports/1509882717793_d80e5584_4ac7_4e77_ad95_dddf7e64e572.jpg';
+    image_path = './eval/00000000.png';
+    image = Image.open(image_path)
+
+    # the array based representatioin of the image will be used later in order to prepare the
+    # result image with boxes and labels on it.
+    image_np = load_image_into_numpy_array(image)
+    #cv2.imshow('test', image)
+    #cv2.waitKey(0)
+    original_image = tf.expand_dims(image_np, axis=0)
     preprocessed_image = model.preprocess(tf.to_float(original_image))
     prediction_dict = model.predict(preprocessed_image)
     detections = model.postprocess(prediction_dict)
