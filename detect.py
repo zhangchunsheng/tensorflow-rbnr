@@ -128,7 +128,7 @@ def detect(create_model_fn):
     model = create_model_fn()
 
     image = cv2.imread('./sports/1509882717793_d80e5584_4ac7_4e77_ad95_dddf7e64e572.jpg')
-    image = cv2.imread('./eval/00000000.png')
+    image = cv2.imread('./eval/00000000.png', cv2.IMREAD_GRAYSCALE)
     original_image = tf.expand_dims(image, axis=0)
     preprocessed_image = model.preprocess(tf.to_float(original_image))
     prediction_dict = model.predict(preprocessed_image)
