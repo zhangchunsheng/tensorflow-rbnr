@@ -333,9 +333,10 @@ def visualize_detection_results(result_dict,
 
     image_pil = Image.fromarray(np.uint8(image)).convert('RGB')
 
-    cv2.namedWindow('detection', cv2.WINDOW_AUTOSIZE)
-    cv2.imshow('detection', np.array(image_pil))
-    cv2.waitKey(0)
+    image_pil.show();
+    #cv2.namedWindow('detection', cv2.WINDOW_AUTOSIZE)
+    #cv2.imshow('detection', np.array(image_pil))
+    #cv2.waitKey(0)
 
 if __name__ == '__main__':
     tf.app.run()
