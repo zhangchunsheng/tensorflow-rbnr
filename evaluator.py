@@ -6,6 +6,7 @@ DetectionModel.
 
 import logging
 import tensorflow as tf
+import cv2;
 
 import eval_util
 from object_detection.core import prefetcher
@@ -42,6 +43,8 @@ def _extract_prediction_tensors(model,
     prefetch_queue = prefetcher.prefetch(input_dict, capacity=500)
     input_dict = prefetch_queue.dequeue()
     original_image = tf.expand_dims(input_dict[fields.InputDataFields.image], 0)
+    #image = cv2.imread('./eval/00000000.png')
+    #original_image = tf.expand_dims(image, axis=0)
     preprocessed_image = model.preprocess(tf.to_float(original_image))
     prediction_dict = model.predict(preprocessed_image)
     detections = model.postprocess(prediction_dict)

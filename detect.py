@@ -122,9 +122,9 @@ def main(unused_argv):
     if FLAGS.run_once:
         eval_config.max_evals = 1
 
-    detect(model_fn)
+    detect(model_fn, categories)
 
-def detect(create_model_fn):
+def detect(create_model_fn, categories):
     model = create_model_fn()
 
     image = cv2.imread('./sports/1509882717793_d80e5584_4ac7_4e77_ad95_dddf7e64e572.jpg')
@@ -162,11 +162,6 @@ def detect(create_model_fn):
     )
 
     result_dict = sess.run(tensor_dict)
-
-    label_map = label_map_util.load_labelmap("/Users/changetheworld/dev/git/tensorflow-rbnr/labels/rbnr_label_map.pbtxt")
-    max_num_classes = max([item.id for item in label_map.item])
-    categories = label_map_util.convert_label_map_to_categories(
-        label_map, max_num_classes)
 
     visualize_detection_results(
         result_dict,
