@@ -3,9 +3,7 @@ This project is for racing bib number detection.
 
 ## Reference
 
-* tensorflow models
-
-https://github.com/tensorflow/models/tree/master/research/object_detection
+[TensorFlow models](https://github.com/tensorflow/models/tree/master/research/object_detection)
 
 * Tips
 
